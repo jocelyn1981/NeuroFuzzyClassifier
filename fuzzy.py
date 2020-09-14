@@ -1,19 +1,3 @@
-#  Copyright © 2018 Siddharth Mukkamala. Terms of use below. 
-
-#  Despite the copyright, the following Software is made available to anyone interested free of charge; you may copy, distribute or modify the source code
-#  as you like, provided you adhere to the following conditions:
-#  1) Any distribution of a copy of this software must be made free of charge; you may not sell a copy of the source code/software.
-#  2) If you modify the source code, you may not publish or distribute the resulting derivative work without explicit permission from the author.*
-#  3) Understand that the software comes without any warranty.
-#
-
-#  Contact Information: E-mail: siddharth.world@gmail.com
-#  NOTE: This software is an implementation created from scratch by the Author with influences from the abstract works of Dr. Detlef Nauck and Dr. Rudolf Kruse.
-#  NOTE 2: Additionally, the software as it exists at this point in time (April 2018) is in its beta version, and I am hoping to improve upon 
-#  the architecture and optimization in the foreseeable future.
-
-#  * I can assure you the permission will be granted in writing promptly, I just want to stay informed about the potential benefits of Neuro - Fuzzy classifiers. 
-
 # ~ ==============================================================================================================================================================================================
 
 
@@ -100,10 +84,8 @@ class FuzzySets:
 
 	def __init__(self, lst_linguistic_terms, lst_parameters_lst):
 		temp_lst = []
-		# self.lst_fuzzysets = []
+
 		for i in range(len(lst_linguistic_terms)):
-			# print("ling term: ",lst_linguistic_terms[i] )
-			# print("membership function parameters: ", lst_parameters_lst[i])
 			if i == 0:
 				temp_lst.append(FuzzySet(lst_linguistic_terms[i], lst_parameters_lst[i], l_shouldered = True))
 			elif i == len(lst_linguistic_terms) - 1:
@@ -111,7 +93,6 @@ class FuzzySets:
 			else:
 
 				temp_lst.append(FuzzySet(lst_linguistic_terms[i], lst_parameters_lst[i]))
-			# print("size of fuzzysets: ", len(self.lst_fuzzysets) )
 		self.lst_fuzzysets = temp_lst
 
 	# A graphical illustration of the fuzzy sets of the domain.
@@ -119,9 +100,6 @@ class FuzzySets:
 
 	def plot_sets(self):
 		for i in range(len(self.lst_fuzzysets)):
-			# print(self.lst_fuzzysets[i].a)
-			# print(self.lst_fuzzysets[i].b)
-			# print(self.lst_fuzzysets[i].c)
 			print(self.lst_fuzzysets[i].name())
 
 			if self.lst_fuzzysets[i].l_shouldered == True:
@@ -132,9 +110,7 @@ class FuzzySets:
 			else:
 
 				plt.plot([self.lst_fuzzysets[i].a,self.lst_fuzzysets[i].b,self.lst_fuzzysets[i].c], [0,1,0])
-		# 	plt.plot([1,2,3], [1,1,0])
-		# 	plt.plot([3,4,5], [0,1,0])
-		# 	plt.plot([5,6,7], [0,1,1])
+
 		plt.show()
 
 
@@ -164,19 +140,13 @@ class Fuzzy_domain:
 
 # Creating a Rule class that allows us to retrieve the linguistic variables that are the antecedents
 class Rule:
-	# Variables required for a rule
-	# List of antecedent term fuzzy sets
-	lst_fuzzysets = []
-	# List of weights for the rule from the first layer
-	fuzzy_weights = []
-	# Output node - the node that categorizes the training sample into a cluster/category, 0 being first category of node array and etc. (the following of THEN)
-	# This rule says we are going to categorize the antecedents into the cluster node (int between 0 to N-1, where N is the number of output nodes/clusters)
-	output_node = 0
-
 
 	def __init__ (self, lst_fuzzysets, weights, output_node):
+		# List of antecedent term fuzzy sets
 		self.lst_fuzzysets = lst_fuzzysets
+		# List of weights for the rule from the first layer
 		self.fuzzy_weights = weights
+		# Output node - the node that categorizes the training sample into a cluster/category, 0 being first category of node array and etc. (the following of THEN)
 		self.output_node = output_node
 
 	def rule_ling_terms(self):
@@ -201,13 +171,9 @@ class Rule:
 		return rule_str
 
 class sym_rule:
-	# Antecedent is a list of fuzzysets described by linguistic term, each linguistic term is referring to one feature 
-	lst_fuzzysets = ''
-	m = [] # contains list of m's whichs are dicts of the symbolic variables (to express as fuzzy sets)
-	output_node = 0
-
 
 	def __init__ (self, antecedent, m, output_node):
+		# Antecedent is a list of fuzzysets described by linguistic term, each linguistic term is referring to one feature 
 		self.lst_fuzzysets = antecedent
 		self.m = m 
 		self.output_node = output_node
@@ -235,14 +201,56 @@ class sym_rule:
 			category = "virginica"
 
 		for fuzzyset in self.lst_fuzzysets:
-			# rule_str =  rule_str + "AND " + term + " is " + str(round(weight,2)) + " "
 			rule_str =  rule_str + "AND " + fuzzyset.name() +  " "
 		rule_str = rule_str + " AND m " + json.dumps(self.m) + " "
 		rule_str = rule_str + "THEN " + str(self.output_node)
 		
 		return rule_str
 
+# Func about fuzzyfying when given a max and min value:
 
+
+def fuzzyfy(min_val, max_val, num_sets, fuzzy_percent):
+	# min is min value of the feature 
+	# max is max value of the feature
+	# num_sets is the number of fuzzy sets the feature domain is split into
+	# A value between [0,1], that refers to the percentage of fuzzification required 
+
+
+	# calulate difference and the increment
+	dif = (max_val - min_val)/num_sets
+	fuzzy_sets = []
+
+	for i in range(num_sets):
+		val = min_val + i*dif
+		fuzzy_sets.append([val, (val + dif)])
+
+	fuzzy_val = fuzzy_percent* dif 
+
+	for i in range(num_sets):
+		if i == 0:
+			fuzzy_sets[i][1] += fuzzy_val
+
+		elif i == (num_sets -1):
+			fuzzy_sets[i][0] -= fuzzy_val
+		else:
+			fuzzy_sets[i][0] -= (fuzzy_val/2)
+			fuzzy_sets[i][1] += (fuzzy_val/2)
+
+	parameters = []
+
+	for fuzzy_set in fuzzy_sets:
+		a = fuzzy_set[0]
+		c = fuzzy_set[1]
+		b = a +(c-a)/2
+		parameters.append([a,b,c])
+
+
+
+
+	return parameters
+
+# Example use: print(fuzzyfy(0,10,5,0.2))
 
 
 

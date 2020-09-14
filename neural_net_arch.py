@@ -6,21 +6,6 @@ from sklearn.model_selection import train_test_split
 from copy import deepcopy
 
 class Neuro_Fuzzy_Network:
-	# Variables needed
-	num_features = 0
-	max_rules = 0
-	num_outputs = 0
-	# Contains all fuzzy sets needed
-	fuzzy_domain = 0
-	rules = []
-	best_rules = []
-	learning_rate = 0
-	sym_rules = []
-	sym_domain = 0
-
-	# Neural Net variables
-
-
 
 	def __init__(self, fuzzy_domain, max_rules, num_outputs, learning_rate, sym_domain):
 		# Fuzzy_domain is an instance of the class Fuzzy_domain 
@@ -30,6 +15,11 @@ class Neuro_Fuzzy_Network:
 		self.num_outputs = num_outputs
 		self.learning_rate = learning_rate
 		self.sym_domain = sym_domain
+		self.rules = []
+		self.best_rules = []
+		self.sym_rules = []
+
+
 
 	# takes a list of symbol variables and returns a dict for the network to handle 
 
