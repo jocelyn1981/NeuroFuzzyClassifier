@@ -65,15 +65,6 @@ class Neuro_Fuzzy_Network:
 		# Needs updating
 		self.rules.append(Rule)
 
-	def process(self, input_matrix, output_matrix):
-	# OUt put matrix will be of the form where we take each row and it will contian a single 1 and rest are 0s. 
-	# Extract each input datapoint (a vector) and its respective output datapoint that shows the category it belongs to
-
-	# for each datapoint, Call feedforward(input, output)
-
-	# Once an epoch is completed, 
-		return 0
-
 
 	# Helper function that takes in a single data point and a FuzzySets instance, returns a tuple of the linguist term that datapoint
 	# belong to as well as the degree of memberhsip (the higest degree of membership is chosen with its linguistic variable)
@@ -86,15 +77,12 @@ class Neuro_Fuzzy_Network:
 		max_val = 0
 
 		for fuzzyset in fuzzy_lst:
-			# print("in new fuzzyset")
+			
 			mem_val = fuzzyset.membership_degree(value)
-			# print("mem_val is: ", mem_val)
 			if mem_val > max_val:
 				max_val = mem_val
-				# print(fuzzyset.name())
-				# CHANGED HERE!!!
 				ling_val = fuzzyset
-			# print("done with fuzzy set")
+			
 
 
 		return ling_val, max_val 
@@ -125,27 +113,14 @@ class Neuro_Fuzzy_Network:
 		# iterate over the input array and return a linguistic term and the highest membership func value
 		# for each row value in input_vec, return a tuple of the linguist term and highest membership function
 		for value, fuzzysets in zip(input_vec, self.fuzzy_domain.return_fuzzy_domain()):
-			# print("value is: ", value, "and set: ", fuzzysets)
-			# print("call helper function")
 			ling, mem_val = self.ling_mem(value, fuzzysets)
 			ling_terms.append(ling)
 			mem_vals.append(mem_val)
-			# print("linguistic term: ", ling, "and highest membership value is: ", mem_val)
 
 		# Find if rule with the same linguistic variables, IN THE SAME ORDER exists
 
 		# Comapres each rules ling_terms and their order with ling_term of the datapoint
-		if self.does_rule_exist(ling_terms):
-			do_nothing = 0
-
-			# IF true, then we simply continue with the feedforward mechanism 
-			# Code here to continue feed forward
-
-			# then feed forward to next level and find output and apply winner take all and see if it matches output
-
-			# IMPORTNAT!!!! TODO FOR LEARNING : call a new function that takes delta value and "back propagates" to adjust the parameters of Fuzzy sets
-
-		else:
+		if not self.does_rule_exist(ling_terms):
 			# print("rule doesnt exist")
 			# Create a rule with the ling_terms and the mem_vals which will act as weights 
 			new_rule = fuzzy.Rule(ling_terms, mem_vals, output_val)
@@ -153,12 +128,6 @@ class Neuro_Fuzzy_Network:
 			#Add the newly created rule to rules by using function add_rule(rule)
 			self.add_rule(new_rule)
 
-			#Then exit
-
-		
- 		# Have to change the output, maybe not have it return anything?
-
-		return #ling_terms, mem_vals
 
 	def feedforward(self, X, y, return_rule_activations = False, use_best_rulebase = False):
 		# we feed forward each pattern one at a time
@@ -300,41 +269,10 @@ class Neuro_Fuzzy_Network:
 			non_zeros_indices_sym = np.append(non_zeros_indices_sym,[index,a,b])
 
 			# non_zeros_indices_sym now contains all the indices of the symbolic rules which have activations and need to count
-			# occurances of symbolic variables now
-		# print(non_zeros_indices_sym)
-			
-
+			# occurances of symbolic variables now			
 
 		# Since we can access the symrules using recorded indexes we have to update m accordingly, uisng a pre-defined formula for the position of sym variables in m
 
-			# Maybe CHANGE THE ARCHITECTURE OF CODE so that the order in which the symbolic variables are given will be recorded as their 
-			# ... position in the fuzzy sets of symbolic variables , or as known in this case, m
-
-
-
-		# Using non_zeros_indices, use sym_domain to count number of occurances of symbolic variables for the numeric rules that were 'activated'
-
-			# Since we already have the indices of all sym_rules (which when thought of as hyper boxes), that x belongs to,..
-			# ...we just have to find the sym_rules which match the output node (category) and then increment their m value in the position
-			# ... which matches the sym_val.
-
-		# Retrieve sym_rule using the indices we have found, one index at a time 
-		# for index in non_zeros_indices_sym:			
-		# 	sym_rule = self.sym_rules[index]
-		# 	# Check to see if the sym_rule consequent is the same category as the training example we are at now
-		# 	if sym_rule.output_node == y:
-		# 		# If so, then increment the count of the m at index(sym_val) 
-		# 		if sym_val == 'text':
-		# 			sym_rule.change_m(np.array([sym_rule.m[0]+ 1 ,sym_rule.m[1],sym_rule.m[2]]))
-		# 		elif sym_val == 'image':
-		# 			sym_rule.change_m(np.array([sym_rule.m[0] ,sym_rule.m[1]+ 1,sym_rule.m[2]]))
-		# 		elif sym_val == 'video':
-		# 			sym_rule.change_m(np.array([sym_rule.m[0] ,sym_rule.m[1],sym_rule.m[2]+ 1]))
-
-		# TODO: Have the input of the symbolic variables as a list, then map it into a dict, key-value pair where values will range from 
-		# 0 through to n-1 , where n is the number of symbolic variables in the list and the keys are the symbolic variables. Example: ['text', 'image', 'video']
-		#.. the dict would be: {'text'= 0, 'image'= 1, 'video'= 2}
-		# print("starting symbolic var counting! ", non_zeros_indices_sym)
 		for index in non_zeros_indices_sym:		
 
 			sym_rule = self.sym_rules[index]
@@ -371,16 +309,6 @@ class Neuro_Fuzzy_Network:
 					return True
 
 			return False 
-
-
-
-
-
-		# def determine(rule):
-		# 	if sum(rule.m.values()) == 0:
-		# 		return False
-		# 	else:
-		# 		return True 
 		self.sym_rules[:] = [sym_rule for sym_rule in self.sym_rules if determine(sym_rule)]
 		# somelist[:] = [tup for tup in somelist if determine(tup)]
 
@@ -394,9 +322,7 @@ class Neuro_Fuzzy_Network:
 			for l, l2 in zip(lst,lst2):
 				temp.append(min(l,l2))
 			return max(temp)
-
-		# HAVE TO SUBSTANTIALL IMPROVE THIS FUNCTION, SO FAR ITS JUT HACKED TOGETHER 
-
+ 
 
 		# Step 1, take a rule and look at the next (num_outputs - 1 ) rules to see if there is a match, and whether a contradiction exists
 		for i in range(len(self.sym_rules) - (self.num_outputs - 1) ):
@@ -407,12 +333,6 @@ class Neuro_Fuzzy_Network:
 				# use compare to return if a contradiction exists and print for now
 				print(compare(current_sym_rule, self.sym_rules[i+j]))
 
-
-			# Improve this, edge cases are not properly handled !!! TODO
-			print(compare(self.sym_rules[-1], self.sym_rules[-2]))
-
-			# TODO, remove contradictions after developing the method to calculate performances of rules
-			# Develop this if the need arises 
 
 		# This activations function returns the list of rule performances 
 	def activations(self, X_matrix, train_sym ,y_vals):
@@ -442,7 +362,6 @@ class Neuro_Fuzzy_Network:
 			# THE BELOW code has to be changed to allow to handle more than 1 symbolic variable 
 			# Get a list of fuzzyvalues from m (from each rule) related to the sym_val of the current training example,
 			# rule_vals_for_sym = [rule.m[sym] for rule in self.sym_rules]
-			# print(rule_activations)
 
 			rule_vals_for_sym = []
 			for rule in self.sym_rules:
@@ -458,18 +377,6 @@ class Neuro_Fuzzy_Network:
 
 				# Now that we have the min value among the symbolic variables for the given example, we append it to rule_vals_for_sym
 				rule_vals_for_sym.append(min_val)
-
-
-
-
-
-
-
-
-
-
-
-
 
 			# compare activations and rule_vals_for_sym and take the min value of the smallest numerical fuzzy value and the smallest symbolic fuzzy value (personal choice, check back to offer another option)
 			rule_performance_val = [ min(val1,val2) for val1, val2 in zip(rule_activations, rule_vals_for_sym)]
@@ -497,152 +404,25 @@ class Neuro_Fuzzy_Network:
 			print(self.sym_rules[array[-i]].redable())
 
 
+	def redable_rule(self, categories,sym_categories ,sym_rule):
+		counter = 0
+		antecedents = sym_rule.lst_fuzzysets
 
+		formatted_str = ""
 
+		for i in range(len(categories)):
+			if i == 0:
+				formatted_str +=  categories[i] + " is " + antecedents[i].name()
+			else:
+				formatted_str += " AND " + categories[i] + " is " +antecedents[i].name()
 
+		# Handle formatting of symbolic part of rule
+		for j in range(len(sym_categories)):
+			formatted_str += "  AND " + sym_categories[j] + "  is  " + json.dumps(sym_rule.m[j])
 
 
+		return formatted_str + " THEN " + str(sym_rule.output_node) 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-# net = Neuro_Fuzzy_Network(dataset.fd,7,3, 0.3, [["text", "image", "video"]])
-
-# X_train = dataset.X_train
-# X_test = dataset.X_test
-# y_train = dataset.y_train
-# y_test = dataset.y_test
-# train_sym = dataset.train_syms
-# test_sym = dataset.test_sym
-
-
-
-# #==========================#
-
-# # for x,y in zip(X_train, y_train):
-# # 	net.rule_base(x,y)
-# for x,y in zip(X_train, y_train):
-# 	net.rule_base(x,y)
-# # for rule in net.rules:
-# # 	print(rule.readable_Rule())
-# # 3 symbolic variables, that include text, image, video
-# net.init_sym_rulebase(3)
-
-
-
-
-# # populate the sym rule base using algorithm
-# for x,sym_val,y in zip(X_train, train_sym, y_train):
-# 	# print(x,sym_val,y)
-# 	net.populate_sym_rulebase(x,sym_val, y)
-
-
-
-# # Normalise the symbolic frequencies into fuzzy sets
-
-# for sym_rule in net.sym_rules:
-# 	net.normalise(sym_rule.m)
-# 	# print(sym_rule.m)
-
-
-
-
-# # Remove rules where all values are 0, i.e. where there is not even a single training example that represents this rule. 
-# net.remove_zero_value_rules()
-
-
-
-# # REMOVING CONTRADICTORY RULES NEEDS WORK ==============
-# # # Remove contradictory rules 
-# # net.remove_contradictions()
-# # ======================================================================
-
-# # for sym_rule in net.sym_rules:
-# # 	print(sym_rule.m)
-
-# # print(net.activations(X_train, train_sym ,y_train))
-# # net.best_sym_rules(X_train, train_sym ,y_train )
-
-# for rule in net.sym_rules:
-# 	print(rule.m)
-# for rule in net.rules:
-# 	print(rule.readable_Rule())
-
-
-
-
-#======= DELETE BELOW ========= +
-
-
-
-# # net = Neuro_Fuzzy_Network(dataset.fd,7,3, 0.3, ['text', 'image', 'video'])
-# net = Neuro_Fuzzy_Network(nv.fd,7,3, 0.3, [['link', 'photo', 'video']])
-# # X_train = dataset.X_train
-# # X_test = dataset.X_test
-# # y_train = dataset.y_train
-# # y_test = dataset.y_test
-# # train_sym = dataset.train_sym
-# # test_sym = dataset.test_sym
-
-
-
-# #==========================#
-
-# # for x,y in zip(X_train, y_train):
-# 	# net.rule_base(x,y)
-# for x,y in zip(nv.data, nv.outputs):
-# 	net.rule_base(x,y)
-
-# # for rule in net.rules:
-# # 	print(rule.readable_Rule())
-# # 3 symbolic variables, that include text, image, video
-# net.init_sym_rulebase(3)
-
-
-# # populate the sym rule base using algorithm
-# # for x,sym_val,y in zip(X_train, train_sym, y_train):
-# # 	print(x,sym_val,y)
-# 	# net.populate_sym_rulebase(x,sym_val, y)
-
-# for x,sym_val,y in zip(nv.data, nv.train_syms , nv.outputs):
-# # 	# print(x,sym_val,y)
-# 	# print("doin")
-# 	# print(x,"  ", sym_val, "  ", y )
-# 	net.populate_sym_rulebase(x,sym_val, y)
-
-
-# # # Normalise the symbolic frequencies into fuzzy sets
-
-# for sym_rule in net.sym_rules:
-# 	net.normalise(sym_rule.m)
-
-
-
-# # Remove rules where all values are 0, i.e. where there is not even a single training example that represents this rule. 
-# net.remove_zero_value_rules()
-
-# # # Remove contradictory rules 
-# # net.remove_contradictions()
-
-
-# for sym_rule in net.sym_rules:
-# 	print(sym_rule.redable())
-
-# # print(net.activations(X_train, train_sym ,y_train))
-# # net.best_sym_rules(7, X_train, train_sym ,y_train )
-
-# # for rule in net.rules:
-# # 	print(rule.readable_Rule())
-# # print(train_sym)
-# # for rule in net.rules:
-# # 	print(rule.readable_Rule())
